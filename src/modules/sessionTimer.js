@@ -1,28 +1,15 @@
 export const INCREMENT_TIME = 'sessionTimer/INCREMENT_TIME';
 export const DECREMENT_TIME = 'sessionTimer/DECREMENT_TIME';
 export const RESET_TIME = 'sessionTimer/RESET_TIME';
-export const PLAY_PAUSE = 'sessionTimer/PLAY_PAUSE';
+export const START_TIMER = 'sessionTimer/START_TIMER';
 
 
 const initialState = {
-  timers: [
-    {
-      id: "session",
-      baseTime: 25,
-      minutes: this.baseTime,
-      seconds: this.baseTime % 60,
-      playing: false
-    },
-    {
-      id: "break",
-      baseTime: 5,
-      minutes: this.baseTime,
-      seconds: this.baseTime % 60,
-      playing: false
-    }
-  ],
-  play: false,
-  currentTimer: "session"
+  sessionBaseTime: 25,
+  breakBaseTime: 5,
+  playing: false,
+  sessionTime: null,
+  breakTime: null
 };
 
 export default (state = initialState, action) => {
@@ -30,77 +17,46 @@ export default (state = initialState, action) => {
     case INCREMENT_TIME:
       return {
         ...state,
-        timers: state.timers.map((timer) => {
-          if (timer.id === action.id) {
-            return {
-              ...timer, 
-              baseTime: timer.baseTime + 1,
-              timeLeft: (timer.timeLeft) ? timer.timeLeft + 1 : null
-            }
-          }
-          return {...timer}
-        })
+        [action.id]: action.value
       }
     case DECREMENT_TIME:
       return {
         ...state,
-        timers: state.timers.map((timer) => {
-          if (timer.id === action.id) {
-            return {
-              ...timer, 
-              baseTime: Math.max(timer.baseTime - 1, 1),
-              timeLeft: (timer.timeLeft) ? Math.max(timer.timeLeft - 1, 1) : null
-            }
-          }
-          return {...timer}
-        })
+        [action.id]: Math.max(action.value, 1)
       }
     case RESET_TIME:
       return {
         ...state,
-        timers: [
-          {
-            id: "session",
-            baseTime: 25,
-            timeLeft: null,
-          },
-          {
-            id: "break",
-            baseTime: 5,
-            timeLeft: null,
-          }
-        ],
-        play: false,
-        currentTimer: "session"
+        sessionBaseTime: 25,
+        breakBaseTime: 5,
+        playing: false,
       }
-    case PLAY_PAUSE:
+    case START_TIMER:
       return {
         ...state,
-        play: !state.play,
-        currentTimer: action.id,
-        timers: state.timers.map((timer) => {
-          if (timer.id === action.id) {
-            return {...timer, timeLeft: (timer.timeLeft) ? Math.min(timer.timeLeft, timer.baseTime) : timer.baseTime}
-          }
-          return {...timer}
-        })
+        playing: !state.playing,
+        sessionTime: action.currentTime + state.sessionBaseTime * 60000,
+        breakTime: action.currentTime + (state.sessionBaseTime + state.breakBaseTime) * 60000 
       }
     default:
       return state;
   }
 };
 
-export const addTime = (id) => {
+export const addTime = (id, value) => {
+  console.log(value)
   return {
     type: INCREMENT_TIME,
-    id
+    id,
+    value
   }
 }
 
-export const subtractTime = (id) => {
+export const subtractTime = (id, value) => {
   return {
     type: DECREMENT_TIME,
-    id
+    id,
+    value
   }
 }
 
@@ -110,10 +66,10 @@ export const resetTimers = () => {
   }
 }
 
-export const playTimer = (id) => {
+export const playTimer = () => {
   return({
-    type: PLAY_PAUSE,
-    id
+    type: START_TIMER,
+    currentTime: new Date().getTime()
   })
 }
 

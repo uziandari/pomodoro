@@ -16,15 +16,15 @@ const Pomodoro = props => (
   <div className="pomo-container">
 
     <div className="pomo-timer" id="session-timer">
-      <button onClick={() => props.addTime("session")}>add</button>
+      <button onClick={() => props.addTime("sessionBaseTime", props.sessionBaseTime + 1)}>add</button>
       <Timer baseTime={props.sessionBaseTime} />
-      <button onClick={() => props.subtractTime("session")}>subtract</button>
+      <button onClick={() => props.subtractTime("sessionBaseTime", props.sessionBaseTime + 1)}>subtract</button>
       {/*remove time*/}
     </div>
     <div className="pomo-timer" id="break-timer">
-      <button onClick={() => props.addTime("break")}>add</button>
+      <button onClick={() => props.addTime("breakBaseTime", props.breakBaseTime + 1)}>add</button>
       <Timer baseTime={props.breakBaseTime} />
-      <button onClick={() => props.subtractTime("break")}>subtract</button>
+      <button onClick={() => props.subtractTime("breakBaseTime", props.breakBaseTime - 1)}>subtract</button>
     </div>
     <div className="controls">
       <button onClick={() => props.playTimer(props.currentTimer)}>
@@ -43,17 +43,17 @@ const Pomodoro = props => (
 
 const mapDispatchToProps = dispatch => {
   return {
-    addTime: (id) => { dispatch(addTime(id)) },
-    subtractTime: (id) => { dispatch(subtractTime(id)) },
-    resetTimers: (id) => { dispatch(resetTimers()) },
-    playTimer: (id) => { dispatch(playTimer(id)) }
+    addTime: (id, value) => { dispatch(addTime(id, value)) },
+    subtractTime: (id, value) => { dispatch(subtractTime(id, value)) },
+    resetTimers: () => { dispatch(resetTimers()) },
+    playTimer: () => { dispatch(playTimer()) }
   }
 }
 
 const mapStateToProps = (state) => ({
-  sessionBaseTime: state.sessionTimer.timers[0].baseTime,
-  breakBaseTime: state.sessionTimer.timers[1].baseTime,
-  playControl: state.sessionTimer.play,
+  sessionBaseTime: state.sessionTimer.sessionBaseTime,
+  breakBaseTime: state.sessionTimer.breakBaseTime,
+  playControl: state.sessionTimer.playing,
   currentTimer: state.sessionTimer.currentTimer
 })
 
