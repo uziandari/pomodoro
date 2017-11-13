@@ -9,16 +9,20 @@ const initialState = {
     {
       id: "session",
       baseTime: 25,
-      timeLeft: null,
+      minutes: this.baseTime,
+      seconds: this.baseTime % 60,
+      playing: false
     },
     {
       id: "break",
       baseTime: 5,
-      timeLeft: null,
+      minutes: this.baseTime,
+      seconds: this.baseTime % 60,
+      playing: false
     }
   ],
   play: false,
-  currentTimer: null
+  currentTimer: "session"
 };
 
 export default (state = initialState, action) => {
@@ -67,7 +71,7 @@ export default (state = initialState, action) => {
           }
         ],
         play: false,
-        currentTimer: null
+        currentTimer: "session"
       }
     case PLAY_PAUSE:
       return {
@@ -107,9 +111,9 @@ export const resetTimers = () => {
 }
 
 export const playTimer = (id) => {
-  return {
+  return({
     type: PLAY_PAUSE,
     id
-  }
+  })
 }
 
