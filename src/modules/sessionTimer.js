@@ -2,6 +2,8 @@ export const INCREMENT_TIME = 'sessionTimer/INCREMENT_TIME';
 export const DECREMENT_TIME = 'sessionTimer/DECREMENT_TIME';
 export const RESET_TIME = 'sessionTimer/RESET_TIME';
 export const START_TIMER = 'sessionTimer/START_TIMER';
+export const PAUSE_TIMER = 'sessionTimer/PAUSE_TIMER';
+export const TICK = 'sessionTimer/TICK';
 
 
 const initialState = {
@@ -9,7 +11,10 @@ const initialState = {
   breakBaseTime: 5,
   playing: false,
   sessionTime: null,
-  breakTime: null
+  breakTime: null,
+  interval: null,
+  sessionTimeLeft: null,
+  breakTimeLeft: null
 };
 
 export default (state = initialState, action) => {
@@ -30,13 +35,43 @@ export default (state = initialState, action) => {
         sessionBaseTime: 25,
         breakBaseTime: 5,
         playing: false,
+        sessionTime: null,
+        breakTime: null,
+        interval: null,
+        sessionTimeLeft: null,
+        breakTimeLeft: null
       }
     case START_TIMER:
+      if (state.sessionTime === null && state.breakTime === null) {
+        return {
+          ...state,
+          playing: true,
+          sessionTime: action.time + state.sessionBaseTime * 60000,
+          breakTime: action.time + (state.sessionBaseTime + state.breakBaseTime) * 60000,
+          interval: action.interval 
+        }
+      }
       return {
         ...state,
-        playing: !state.playing,
-        sessionTime: action.currentTime + state.sessionBaseTime * 60000,
-        breakTime: action.currentTime + (state.sessionBaseTime + state.breakBaseTime) * 60000 
+        playing: true,
+        sessionTime: state.sessionTimeLeft + action.time,
+        breakTime: state.breakTimeLeft + action.time,
+        interval: action.interval 
+      }
+      
+    case PAUSE_TIMER:
+      return {
+        ...state,
+        playing: false,
+        sessionTime: state.sessionTime - action.time,
+        breakTime: state.breakTime - action.time,
+        interval: null 
+      }
+    case TICK:
+      return {
+        ...state,
+        sessionTimeLeft: state.sessionTime - action.time,
+        breakTimeLeft: state.breakTime - action.time
       }
     default:
       return state;
@@ -44,7 +79,6 @@ export default (state = initialState, action) => {
 };
 
 export const addTime = (id, value) => {
-  console.log(value)
   return {
     type: INCREMENT_TIME,
     id,
@@ -60,16 +94,33 @@ export const subtractTime = (id, value) => {
   }
 }
 
-export const resetTimers = () => {
+export const resetTimers = (interval) => {
+  clearInterval(interval)
   return {
     type: RESET_TIME
   }
 }
 
-export const playTimer = () => {
+export const playTimer = (dispatch) => {
+  const interval = setInterval(() => {
+    dispatch({
+      type: TICK,
+      time: new Date().getTime()
+    })
+  }, 1000)
+  
   return({
     type: START_TIMER,
-    currentTime: new Date().getTime()
+    time: new Date().getTime(),
+    interval
   })
+}
+
+export const pauseTimer = (interval) => {
+  clearInterval(interval)
+  return {
+    type: PAUSE_TIMER,
+    time: new Date().getTime(),
+  }
 }
 

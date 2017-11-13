@@ -5,7 +5,8 @@ import {
   addTime,
   subtractTime,
   resetTimers,
-  playTimer
+  playTimer,
+  pauseTimer
 } from '../modules/sessionTimer'
 
 import Timer from '../components/timer'
@@ -18,7 +19,7 @@ const Pomodoro = props => (
     <div className="pomo-timer" id="session-timer">
       <button onClick={() => props.addTime("sessionBaseTime", props.sessionBaseTime + 1)}>add</button>
       <Timer baseTime={props.sessionBaseTime} />
-      <button onClick={() => props.subtractTime("sessionBaseTime", props.sessionBaseTime + 1)}>subtract</button>
+      <button onClick={() => props.subtractTime("sessionBaseTime", props.sessionBaseTime - 1)}>subtract</button>
       {/*remove time*/}
     </div>
     <div className="pomo-timer" id="break-timer">
@@ -27,12 +28,13 @@ const Pomodoro = props => (
       <button onClick={() => props.subtractTime("breakBaseTime", props.breakBaseTime - 1)}>subtract</button>
     </div>
     <div className="controls">
-      <button onClick={() => props.playTimer(props.currentTimer)}>
         {
-          (props.playControl) ? <span>Pause</span> : <span>Play</span>
+          (!props.playPauseControl) 
+            ? <button onClick={() => props.playTimer()}>Play</button>
+            : <button onClick={() => props.pauseTimer(props.interval)}>Pause</button>
         }
-      </button>
-      <button onClick={() => props.resetTimers()}>Reset</button>
+      
+      <button onClick={() => props.resetTimers(props.interval)}>Reset</button>
     </div>
     <div className="current-timer">
         <CurrentTimer currentTimer={props.currentTimer}/>
@@ -45,16 +47,18 @@ const mapDispatchToProps = dispatch => {
   return {
     addTime: (id, value) => { dispatch(addTime(id, value)) },
     subtractTime: (id, value) => { dispatch(subtractTime(id, value)) },
-    resetTimers: () => { dispatch(resetTimers()) },
-    playTimer: () => { dispatch(playTimer()) }
+    resetTimers: (interval) => { dispatch(resetTimers(interval)) },
+    playTimer: () => { dispatch(playTimer(dispatch)) },
+    pauseTimer: (interval) => { dispatch(pauseTimer(interval)) }
   }
 }
 
 const mapStateToProps = (state) => ({
   sessionBaseTime: state.sessionTimer.sessionBaseTime,
   breakBaseTime: state.sessionTimer.breakBaseTime,
-  playControl: state.sessionTimer.playing,
-  currentTimer: state.sessionTimer.currentTimer
+  playPauseControl: state.sessionTimer.playing,
+  currentTimer: state.sessionTimer.currentTimer,
+  interval: state.sessionTimer.interval
 })
 
 Pomodoro.propTypes = {
