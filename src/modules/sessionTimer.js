@@ -2,7 +2,7 @@ export const INCREMENT_TIME = 'sessionTimer/INCREMENT_TIME';
 export const DECREMENT_TIME = 'sessionTimer/DECREMENT_TIME';
 export const RESET_TIME = 'sessionTimer/RESET_TIME';
 export const START_TIMER = 'sessionTimer/START_TIMER';
-export const PAUSE_TIMER = 'sessionTimer/PAUSE_TIMER';
+export const STOP_TIMER = 'sessionTimer/STOP_TIMER';
 export const TICK = 'sessionTimer/TICK';
 
 
@@ -10,11 +10,10 @@ const initialState = {
   sessionBaseTime: 25,
   breakBaseTime: 5,
   playing: false,
-  sessionTime: null,
-  breakTime: null,
-  interval: null,
-  sessionTimeLeft: null,
-  breakTimeLeft: null
+  playTime: undefined,
+  sessionGoalTime: undefined,
+  breakGoalTime: undefined,
+  gapTime: undefined,
 };
 
 export default (state = initialState, action) => {
@@ -35,43 +34,29 @@ export default (state = initialState, action) => {
         sessionBaseTime: 25,
         breakBaseTime: 5,
         playing: false,
-        sessionTime: null,
-        breakTime: null,
-        interval: null,
-        sessionTimeLeft: null,
-        breakTimeLeft: null
+        playTime: undefined,
+        stopTime: undefined,
+        sessionGoalTime: undefined,
+        breakGoalTime: undefined
       }
     case START_TIMER:
-      if (state.sessionTime === null && state.breakTime === null) {
-        return {
-          ...state,
-          playing: true,
-          sessionTime: action.time + state.sessionBaseTime * 60000,
-          breakTime: action.time + (state.sessionBaseTime + state.breakBaseTime) * 60000,
-          interval: action.interval 
-        }
-      }
       return {
         ...state,
         playing: true,
-        sessionTime: state.sessionTimeLeft + action.time,
-        breakTime: state.breakTimeLeft + action.time,
-        interval: action.interval 
+        playTime: action.currentTime,
+        sessionGoalTime: (state.stopTime) 
+                    ? action.currentTime + (state.sessionGoalTime - state.stopTime) 
+                    : action.currentTime + (state.sessionBaseTime * 60000),
+        breakGoalTime: (state.stopTime) 
+                    ? action.currentTime + (state.breakGoalTime - state.stopTime) 
+                    : action.currentTime + ((state.sessionBaseTime + state.breakBaseTime) * 60000),
+        stopTime: undefined
       }
-      
-    case PAUSE_TIMER:
+    case STOP_TIMER:
       return {
         ...state,
         playing: false,
-        sessionTime: state.sessionTime - action.time,
-        breakTime: state.breakTime - action.time,
-        interval: null 
-      }
-    case TICK:
-      return {
-        ...state,
-        sessionTimeLeft: state.sessionTime - action.time,
-        breakTimeLeft: state.breakTime - action.time
+        stopTime: action.currentTime
       }
     default:
       return state;
@@ -94,33 +79,23 @@ export const subtractTime = (id, value) => {
   }
 }
 
-export const resetTimers = (interval) => {
-  clearInterval(interval)
+export const resetTimers = () => {
   return {
     type: RESET_TIME
   }
 }
 
-export const playTimer = (dispatch) => {
-  const interval = setInterval(() => {
-    dispatch({
-      type: TICK,
-      time: new Date().getTime()
-    })
-  }, 1000)
-  
+export const playTimer = () => {
   return({
     type: START_TIMER,
-    time: new Date().getTime(),
-    interval
+    currentTime: new Date().getTime(),
   })
 }
 
-export const pauseTimer = (interval) => {
-  clearInterval(interval)
+export const stopTimer = () => {
   return {
-    type: PAUSE_TIMER,
-    time: new Date().getTime(),
+    type: STOP_TIMER,
+    currentTime: new Date().getTime(),
   }
 }
 
