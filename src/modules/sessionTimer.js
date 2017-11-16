@@ -3,17 +3,15 @@ export const DECREMENT_TIME = 'sessionTimer/DECREMENT_TIME';
 export const RESET_TIME = 'sessionTimer/RESET_TIME';
 export const START_TIMER = 'sessionTimer/START_TIMER';
 export const STOP_TIMER = 'sessionTimer/STOP_TIMER';
-export const TICK = 'sessionTimer/TICK';
 
 
 const initialState = {
-  sessionBaseTime: 25,
+  sessionBaseTime: .1,
   breakBaseTime: 5,
   playing: false,
   playTime: undefined,
   sessionGoalTime: undefined,
   breakGoalTime: undefined,
-  gapTime: undefined,
 };
 
 export default (state = initialState, action) => {
@@ -56,7 +54,7 @@ export default (state = initialState, action) => {
       return {
         ...state,
         playing: false,
-        stopTime: action.currentTime
+        stopTime: action.currentTime,
       }
     default:
       return state;
@@ -98,4 +96,3 @@ export const stopTimer = () => {
     currentTime: new Date().getTime(),
   }
 }
-
