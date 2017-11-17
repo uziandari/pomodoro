@@ -1,11 +1,22 @@
 import React from 'react'
 
-const Timer = (props) => {
-  return (
-    <div>
-      {props.baseTime}
-    </div>
-  )
+const millisToMinutesAndSeconds = (millis) => {
+  var minutes = Math.floor(millis / 60000);
+  var seconds = ((millis % 60000) / 1000).toFixed(0);
+  return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
 }
 
-export default Timer;
+const Timer = props => (
+  <div>
+    <div>
+      {props.currentTimer}
+    </div>
+    <div>
+      {
+        (props.timer) ? millisToMinutesAndSeconds(props.timer): null
+      }
+    </div>
+  </div>
+)
+
+export default Timer
